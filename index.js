@@ -14,7 +14,7 @@ const swaggerOptions = {
     info: {
       title: 'API Microservice',
       version: '1.0.0',
-      description: 'API CRUD pour gérer les données',
+      description: 'API CRUD pour gérer les données des chambres',
     },
     servers: [
       {
@@ -24,11 +24,12 @@ const swaggerOptions = {
     ],
     components: {
       schemas: {
-        Entity: {
+        Room: {
           type: 'object',
           properties: {
             _id: { type: 'string', description: 'Identifiant unique', example: '64f74c8e524a1c0012a34567' },
-            name: { type: 'string', description: 'Nom de l\'entité', example: 'Example Name' },
+            name: { type: 'string', description: 'Nom de la chambre', example: 'C400' },
+            status: { type: 'string', description: 'Statut de la chambre', example: 'Occupé' },
           },
         },
       },
@@ -48,27 +49,29 @@ mongoose
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch((error) => console.error('❌ MongoDB connection error:', error));
 
-// Exemple de modèle Mongoose
-const entitySchema = new mongoose.Schema({
+// Modèle Mongoose pour les chambres
+const roomSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  status: { type: String, required: true },
 });
-const Entity = mongoose.model('Entity', entitySchema);
+
+const Room = mongoose.model('Room', roomSchema);
 
 // Route pour la page d'accueil
 app.get('/', (req, res) => {
   res.send('Bienvenue sur l\'API Chambre! Visitez <a href="/api-docs">/api-docs</a> pour la documentation.');
 });
 
-// Exemple de routes documentées avec Swagger
+// Routes pour les chambres
 
 /**
  * @swagger
- * /entities:
+ * /rooms:
  *   get:
- *     summary: Récupérer toutes les entités
- *     description: Renvoie une liste de toutes les entités dans la base de données.
+ *     summary: Récupérer toutes les chambres
+ *     description: Renvoie une liste de toutes les chambres dans la base de données.
  *     tags:
- *       - Entités
+ *       - Chambres
  *     responses:
  *       200:
  *         description: Liste récupérée avec succès
@@ -77,54 +80,49 @@ app.get('/', (req, res) => {
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Entity'
+ *                 $ref: '#/components/schemas/Room'
  */
-app.get('/entities', async (req, res) => {
+app.get('/rooms', async (req, res) => {
   try {
-    const entities = await Entity.find();
-    res.status(200).json(entities);
+    const rooms = await Room.find();
+    res.status(200).json(rooms);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error retrieving entities', error });
+    res.status(500).json({ message: 'Error retrieving rooms', error });
   }
 });
 
 /**
  * @swagger
- * /entities:
+ * /rooms:
  *   post:
- *     summary: Ajouter une nouvelle entité
- *     description: Crée une nouvelle entité avec un nom.
+ *     summary: Ajouter une nouvelle chambre
+ *     description: Crée une nouvelle chambre avec un nom et un statut.
  *     tags:
- *       - Entités
+ *       - Chambres
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Nom de l'entité
- *                 example: New Entity
+ *             $ref: '#/components/schemas/Room'
  *     responses:
  *       201:
- *         description: Entité créée avec succès
+ *         description: Chambre créée avec succès
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Entity'
+ *               $ref: '#/components/schemas/Room'
  */
-app.post('/entities', async (req, res) => {
+app.post('/rooms', async (req, res) => {
   try {
-    const { name } = req.body;
-    const newEntity = new Entity({ name });
-    await newEntity.save();
-    res.status(201).json(newEntity);
+    const { name, status } = req.body;
+    const newRoom = new Room({ name, status });
+    await newRoom.save();
+    res.status(201).json(newRoom);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error creating entity', error });
+    res.status(500).json({ message: 'Error creating room', error });
   }
 });
 
