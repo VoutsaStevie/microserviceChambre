@@ -5,10 +5,10 @@ services:
   api:
     build: .
     ports:
-      - "3000:3000"
+      - "6000:6000"
     environment:
       - MONGO_URI=mongodb://mongodb:27017/hotel_db
-      - PORT=3000
+      - PORT=6000
     depends_on:
       - mongodb
     networks:
